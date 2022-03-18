@@ -72,11 +72,13 @@ class Board:
                     self.white_left -= 1
     
     def winner(self):
+        # TODO : corriger la méthode
+        self.red_left, self.white_left = self.get_num()
         if self.red_left <= 0:
             return WHITE
         elif self.white_left <= 0:
             return RED
-        
+
         return None 
     
     def get_valid_moves(self, piece):
@@ -159,3 +161,8 @@ class Board:
             right += 1
         
         return moves
+
+    def get_num(self):
+       num_whites = len(self.get_all_pieces(WHITE))
+       num_reds = len(self.get_all_pieces(RED))
+       return num_reds, num_whites

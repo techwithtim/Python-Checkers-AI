@@ -15,7 +15,7 @@ class Game:
     def _init(self):
         self.selected = None
         self.board = Board()
-        self.turn = RED
+        self.turn = WHITE
         self.valid_moves = {}
 
     def winner(self):
@@ -26,12 +26,16 @@ class Game:
 
     def select(self, row, col):
         if self.selected:
+            # il faut que ça soit selected pour pouvoir faire move
             result = self._move(row, col)
+            # il faut que le move soit accepté pour qu'il se passe quelque chose, sinon on annule le move et on recommence
             if not result:
                 self.selected = None
                 self.select(row, col)
         
         piece = self.board.get_piece(row, col)
+        # Piece vaut 0 si la case n'est pas occupée, (255,0,0) si c'est rouge, et (255,255,255) si c'est blanc
+
         if piece != 0 and piece.color == self.turn:
             self.selected = piece
             self.valid_moves = self.board.get_valid_moves(piece)
