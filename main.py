@@ -32,8 +32,8 @@ def main():
 
 
         elif game.turn == RED:
-            value, new_board = minimax(game.get_board(), 3, False, game)
-            #new_board = montecarlots(game.get_board(), RED)
+            #value, new_board = minimax(game.get_board(), 3, False, game)
+            new_board = montecarlots(game.get_board(), RED)
             if new_board == None :
                 run = False
 
@@ -55,7 +55,7 @@ def main():
 #                game.select(row, col)
 #                game.get_board().get_num()
 
-        pygame.time.delay(3000)
+        pygame.time.delay(5000)
         game.update()
     print("And the winner is : ", game.winner())
     pygame.quit()
