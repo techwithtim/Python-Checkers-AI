@@ -27,27 +27,17 @@ def main():
         clock.tick(FPS)
         
         if game.turn == WHITE :
-            #print("White turn. Board is ", game.get_board())
-            new_board = montecarlots(game.get_board(), WHITE)
-            #value, new_board = minimax(game.get_board(), 2, WHITE, game)
-            #print(value)
+            value, new_board = minimax(game.get_board(), 1, WHITE, game)
             game.ai_move(new_board)
-            #print("White has made a move!\nNew board is now ", game.get_board())
-            #pygame.time.delay(100)
 
 
         elif game.turn == RED:
-            #print("Red turn. Board is ", game.get_board())
             new_board = montecarlots(game.get_board(), RED)
-            #value, new_board = minimax(game.get_board(), 1, RED, game)
             if new_board == None :
-                # Minimax return is none if there are no possible moves
                 run = False
 
             else :
                 game.ai_move(new_board)
-                #print("Red has made a move!\nNew board is now ", game.get_board())
-                #pygame.time.delay(100)
 
         if game.winner() != None:
             run = False
@@ -67,6 +57,6 @@ def main():
         pygame.time.delay(1000)
         game.update()
     print("And the winner is : ", game.winner())
-    #pygame.quit()
+    pygame.quit()
 
 main()
