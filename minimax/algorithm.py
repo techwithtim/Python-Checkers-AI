@@ -42,7 +42,7 @@ def get_all_moves(board, color, game):
     moves = []
 
     for piece in board.get_all_pieces(color):
-        valid_moves = board.get_valid_moves(piece)
+        valid_moves = board.get_valid_moves(piece)[1]
         for move, skip in valid_moves.items():
             draw_moves(game, board, piece)
             temp_board = deepcopy(board)
@@ -53,7 +53,7 @@ def get_all_moves(board, color, game):
     return moves
 # test
 def draw_moves(game, board, piece):
-    valid_moves = board.get_valid_moves(piece)
+    valid_moves = board.get_valid_moves(piece)[1]
     board.draw(game.win)
     pygame.draw.circle(game.win, (0,255,0), (piece.x, piece.y), 50, 5)
     game.draw_valid_moves(valid_moves.keys())
