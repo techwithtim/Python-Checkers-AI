@@ -1,7 +1,11 @@
 import copy
+import math
 import random
 from collections import defaultdict
 from copy import deepcopy
+
+from typing import List
+
 from checkers.move import Move
 from checkers.board import Board
 
@@ -28,21 +32,22 @@ class MCNode():
         """
         self.state: Board = state
         self.color = color
-        self.adv_color
+        self.adv_color = WHITE if self.color == RED else RED
         self.reward = 0.0
         self.visits = 1  # On passera toujours par le node qu'on vient de créer
         self.parent = parent
-        self.children = []
+        self.children: List[MCNode] = []
         self.children_moves = []
         self.max_it = max_it
         return
 
     def monte_carlo_tree_search(self):
         for i in range(self.max_it):
-            # TODO
-            last_node = self.select() # Select + expand if needed
+            last_node = self.select()  # Select + expand if needed
             reward = self.simulate(last_node)
             self.backpropagate(reward, last_node)
+            # print(self.as_string())
+            # input()  # DEBUG
 
         return self.best_child()
 
@@ -101,11 +106,24 @@ class MCNode():
         return self.children[-1]
 
     def best_child(self):
-        # TODO : implement selection of the best node, and handle case where no possible moves
-        #  Currently :
-        if len(self.children) == 0 :
-            return None
-        return self.children[random.randint(0,len(self.children)-1)]
+        """
+        Returns the best child of self based on a scoring system called
+        :return:
+        """
+        best_score = -float("inf")
+        best_children = []
+
+        for c in self.children:
+            exploitation = c.reward / c.visits
+            exploration = math.sqrt(math.log2(c.visits) / c.visits)
+            score = exploration + exploitation
+            if score == best_score:
+                best_children.append(c)
+            elif score > best_score:
+                best_children = [c]
+                best_score = score
+
+        return random.choice(best_children)
 
     def is_terminal_node(self):
         """
@@ -123,7 +141,7 @@ class MCNode():
         possible_moves = self.get_all_moves()
         return len(possible_moves) == len(self.children)
 
-    def get_all_moves(self) -> list[Move]:
+    def get_all_moves(self) -> List[Move]:
         """
             Function that returns all the possible outcoming boards from the current position when it is the turn of player "color"
             :param board: Current board
@@ -132,14 +150,13 @@ class MCNode():
         """
         moves = []
         for piece in self.state.get_all_pieces(self.color):
-            valid_moves = self.state.get_valid_moves(piece)[1] # index 0 is the piece itself
+            valid_moves = self.state.get_valid_moves(piece)[1]  # index 0 is the piece itself
             if len(valid_moves) != 0:
                 for final_dest, skip in valid_moves.items():
                     move = Move(piece, final_dest, skip)
                     # print(move)
                     moves.append(move)
         return moves
-
 
     def add_child(self, state, move):
         """
@@ -153,8 +170,8 @@ class MCNode():
         self.children_moves.append(move)
 
     def not_in_children_moves(self, move):
-        for child_move in self.children_moves :
-            if child_move.is_equivalent_to(move) :
+        for child_move in self.children_moves:
+            if child_move.is_equivalent_to(move):
                 return False
         return True
 
@@ -165,7 +182,7 @@ class MCNode():
         :return: Reward value (0 or 1)
         """
 
-        new_state = deepcopy(last_node.state) # To avoid working on existing new_state
+        new_state = deepcopy(last_node.state)  # To avoid working on existing new_state
 
         possible_moves = last_node.get_all_moves()
 
@@ -186,19 +203,23 @@ class MCNode():
     def backpropagate(self, reward, node):
         # +=1 visits pour tout et +reward aux nodes avec la couleur du node de départ, +reward%2 aux autres.
         if node.parent == None:
-            #We got to the root.
+            # We got to the root.
             return
 
-        node.visits += 1 # Same for every node we visited
+        node.visits += 1  # Same for every node we visited
 
         if node.color == self.color:
             node.reward += reward
         else:
-            node.reward += (reward+1)%2 # The reward is adapted according to the color of the node.
+            node.reward += (reward + 1) % 2  # The reward is adapted according to the color of the node.
 
         self.backpropagate(reward, node.parent)
 
-
+    def as_string(self, level=0):
+        ret = "t"*level + str(self.reward) + str(self.visits)+"\n"
+        for child in self.children:
+            ret += child.as_string(level+1)
+        return ret
 
 
 def simulate_move(piece, move, board, skip):
