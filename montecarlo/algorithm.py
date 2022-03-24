@@ -3,6 +3,7 @@ import random
 from collections import defaultdict
 from copy import deepcopy
 from checkers.move import Move
+from checkers.board import Board
 
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
@@ -15,8 +16,8 @@ def montecarlots(board, player):
     return chosen_node_board
 
 
-class MonteCarloTreeSearchNode():
-    def __init__(self, state, color, parent=None, max_it=10):
+class MCNode():
+    def __init__(self, state: Board, color, parent=None, max_it=10):
         """
         Class that modelizes a node as manipulated in a MCTS
         :param game:    Current game
@@ -25,7 +26,7 @@ class MonteCarloTreeSearchNode():
         :param parent:  Parent node, if any (none by default, for root)
         :param parent_action:   pas encore compris ce paramètre
         """
-        self.state = state
+        self.state: Board = state
         self.color = color
         self.adv_color
         self.reward = 0.0
@@ -39,7 +40,9 @@ class MonteCarloTreeSearchNode():
     def monte_carlo_tree_search(self):
         for i in range(self.max_it):
             # TODO
-            self.select()
+            last_node = self.select() # Select + expand if needed
+            reward = self.simulate(last_node)
+            self.backpropagate(reward, last_node)
 
         return self.best_child()
 
@@ -120,7 +123,7 @@ class MonteCarloTreeSearchNode():
         possible_moves = self.get_all_moves()
         return len(possible_moves) == len(self.children)
 
-    def get_all_moves(self):
+    def get_all_moves(self) -> list[Move]:
         """
             Function that returns all the possible outcoming boards from the current position when it is the turn of player "color"
             :param board: Current board
