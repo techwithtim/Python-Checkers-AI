@@ -9,7 +9,7 @@ WHITE = (255, 255, 255)
 
 
 def montecarlots(board, player):
-    tree = MonteCarloTreeSearchNode(board, player)
+    tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
     return chosen_node_board
@@ -27,7 +27,9 @@ class MonteCarloTreeSearchNode():
         """
         self.state = state
         self.color = color
-        self.adv_color = RED if color == WHITE else RED
+        self.adv_color
+        self.reward = 0.0
+        self.visits = 1  # On passera toujours par le node qu'on vient de créer
         self.parent = parent
         self.children = []
         self.children_moves = []
@@ -74,7 +76,7 @@ class MonteCarloTreeSearchNode():
             if self.not_in_children_moves(move):
                 # print("Node expanded with move ", move)
 
-                # When we found a movement that was not tried before, we capture the informations to simulate it
+                # When we found a movement that was not tried before, we capture the information to simulate it
                 # (origin piece, final destination, and if a piece was captured)
                 piece = move.get_piece()
                 final_loc = move.get_loc()
@@ -123,7 +125,7 @@ class MonteCarloTreeSearchNode():
             Function that returns all the possible outcoming boards from the current position when it is the turn of player "color"
             :param board: Current board
             :param color: Current player
-            :return: List of boards corresponding to possible outcomes
+            :return: List of Moves corresponding to possible outcomes
         """
         moves = []
         for piece in self.state.get_all_pieces(self.color):
@@ -143,7 +145,7 @@ class MonteCarloTreeSearchNode():
         :param move:    move to add
         :return:        None
         """
-        child_node = MonteCarloTreeSearchNode(state, parent=self, color=self.adv_color)
+        child_node = MCNode(state, parent=self, color=self.adv_color)
         self.children.append(child_node)
         self.children_moves.append(move)
 
@@ -152,6 +154,49 @@ class MonteCarloTreeSearchNode():
             if child_move.is_equivalent_to(move) :
                 return False
         return True
+
+    def simulate(self, last_node):
+        """
+
+        :param last_node: Initial MCNode for the simulation.
+        :return: Reward value (0 or 1)
+        """
+
+        new_state = deepcopy(last_node.state) # To avoid working on existing new_state
+
+        possible_moves = last_node.get_all_moves()
+
+        new_child = last_node
+
+        while not len(possible_moves) == 0:
+            rand_move = possible_moves[random.randint(0, len(self.children) - 1)]
+            row, col = rand_move.get_loc()
+            new_state.move(rand_move.piece, row, col)
+
+            new_color = RED if last_node.color == WHITE else WHITE
+            new_child = MCNode(new_state, new_color)
+            possible_moves = new_child.get_all_moves()
+
+        winner_color = new_child.state.winner()
+        return 1 if winner_color == last_node.color else 0
+
+    def backpropagate(self, reward, node):
+        # +=1 visits pour tout et +reward aux nodes avec la couleur du node de départ, +reward%2 aux autres.
+        if node.parent == None:
+            #We got to the root.
+            return
+
+        node.visits += 1 # Same for every node we visited
+
+        if node.color == self.color:
+            node.reward += reward
+        else:
+            node.reward += (reward+1)%2 # The reward is adapted according to the color of the node.
+
+        self.backpropagate(reward, node.parent)
+
+
+
 
 def simulate_move(piece, move, board, skip):
     board.move(piece, move[0], move[1])

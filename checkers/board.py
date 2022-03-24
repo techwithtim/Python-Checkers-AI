@@ -18,7 +18,12 @@ class Board:
     def evaluate(self):
         return self.white_left - self.red_left + (self.white_kings * 0.5 - self.red_kings * 0.5)
 
-    def get_all_pieces(self, color):
+    def get_all_pieces(self, color) -> list[Piece]:
+        """
+
+        :param color:
+        :return: All "piece" objects of the board.
+        """
         pieces = []
         for row in self.board:
             for piece in row:
