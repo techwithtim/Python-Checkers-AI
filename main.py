@@ -42,6 +42,31 @@ def minimax_ai_move(game):
     game.ai_move(new_board)
 
 
+def human_move(game):
+    """
+    Executes a move on the board determined by the player.
+    """
+    value, new_board = minimax(game.get_board(), 3, True, game)
+    game.ai_move(new_board)
+    # FIXME: implement the correct function, currently is a copy of minimax_ai_move
+
+
+def make_move(game, p, n, run):
+    """
+    Executes a move on the board determined by the arguments chosen at game launch.
+    """
+    if p[n] == "human":
+        human_move(game)
+    else:
+        print("Player {} ({} AI) is thinking".format(n+1, p[n].upper()))
+        if p[n] == "minimax":
+            minimax_ai_move(game)
+        elif p[n] == "mcts":
+            run = mcts_ai_move(game, run)
+        print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
+    return run
+
+
 def main():
     """
     One can run games of checkers between different types of bot
@@ -59,7 +84,7 @@ def main():
         type=str,
         help="Type of player for player 1",
         required=True,
-        choices=("minimax", "mcts"),
+        choices=("minimax", "mcts", "human"),
         default="minimax",
     )
     parser.add_argument(
@@ -69,7 +94,7 @@ def main():
         type=str,
         help="Type of player for player 2",
         required=True,
-        choices=("minimax", "mcts"),
+        choices=("minimax", "mcts", "human"),
         default="mcts",
     )
     args = parser.parse_args()
@@ -80,20 +105,10 @@ def main():
         clock.tick(FPS)
 
         if game.turn == WHITE:
-            print("Player 1 ({} AI) is thinking".format(p[0].upper()))
-            if p[0] == "minimax":
-                minimax_ai_move(game)
-            elif p[0] == "mcts":
-                run = mcts_ai_move(game, run)
-            print("Player 1 ({} AI) has made its move".format(p[0].upper()))
+            run = make_move(game, p, 0, run)
 
         elif game.turn == RED:
-            print("Player 2 ({} AI) is thinking".format(p[1].upper()))
-            if p[1] == "minimax":
-                minimax_ai_move(game)
-            elif p[1] == "mcts":
-                run = mcts_ai_move(game, run)
-            print("Player 2 ({} AI) has made its move".format(p[1].upper()))
+            run = make_move(game, p, 1, run)
 
         if game.winner() is not None:
             run = False
