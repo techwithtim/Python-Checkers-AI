@@ -61,4 +61,4 @@ optional arguments:
 
 ```
 
-![checkers screen](../assets/img/checkers.png)
+![checkers screen](./assets/checkers.png)
