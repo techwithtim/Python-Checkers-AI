@@ -8,17 +8,38 @@ import argparse
 
 FPS = 60
 
-RED = (255, 0, 0)
-WHITE = (255, 255, 255)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Checkers')
 
 
 def get_row_col_from_mouse(pos):
+    """
+    Returns the row and column numbers from mouse capture.
+    """
     x, y = pos
     row = y // SQUARE_SIZE
     col = x // SQUARE_SIZE
     return row, col
+
+
+def mcts_ai_move(game, run):
+    """
+    Executes a move on the board determined by the MCTS AI.
+    """
+    new_board = montecarlots(game.get_board(), RED)
+    if new_board is None:
+        run = False
+    else:
+        game.ai_move(new_board)
+    return run
+
+
+def minimax_ai_move(game):
+    """
+    Executes a move on the board determined by the Minimax AI.
+    """
+    value, new_board = minimax(game.get_board(), 3, True, game)
+    game.ai_move(new_board)
 
 
 def main():
@@ -39,7 +60,6 @@ def main():
         help="Type of player for player 1",
         required=True,
         choices=("minimax", "mcts"),
-        # choices=("minimax", "mcts", "random", "human"),
         default="minimax",
     )
     parser.add_argument(
@@ -50,26 +70,11 @@ def main():
         help="Type of player for player 2",
         required=True,
         choices=("minimax", "mcts"),
-        # choices=("minimax", "mcts", "random"),
         default="mcts",
     )
     args = parser.parse_args()
 
-    # p = [None, None]
-    # if args.player1 == "minimax":
-    #     p[0] = MINIMAX
-    # else:
-    # # elif args.player1 == "mcts":
-    #     p[0] = MONTE_CARLO
-    #
-    # if args.player2 == "minimax":
-    #     p[1] = MINIMAX
-    # else:
-    # # elif args.player2 == "mcts":
-    #     p[1] = MONTE_CARLO
-
     p = [args.player1, args.player2]
-    # p_str = [args.player1, args.player2]
 
     while run:
         clock.tick(FPS)
@@ -77,44 +82,21 @@ def main():
         if game.turn == WHITE:
             print("Player 1 ({} AI) is thinking".format(p[0].upper()))
             if p[0] == "minimax":
-                value, new_board = minimax(game.get_board(), 3, True, game)
-                game.ai_move(new_board)
+                minimax_ai_move(game)
             elif p[0] == "mcts":
-                new_board = montecarlots(game.get_board(), RED)
-                if new_board is None:
-                    run = False
-                else:
-                    game.ai_move(new_board)
+                run = mcts_ai_move(game, run)
             print("Player 1 ({} AI) has made its move".format(p[0].upper()))
 
         elif game.turn == RED:
             print("Player 2 ({} AI) is thinking".format(p[1].upper()))
             if p[1] == "minimax":
-                value, new_board = minimax(game.get_board(), 3, True, game)
-                game.ai_move(new_board)
+                minimax_ai_move(game)
             elif p[1] == "mcts":
-                new_board = montecarlots(game.get_board(), RED)
-                if new_board is None:
-                    run = False
-                else:
-                    game.ai_move(new_board)
+                run = mcts_ai_move(game, run)
             print("Player 2 ({} AI) has made its move".format(p[1].upper()))
 
         if game.winner() is not None:
             run = False
-
-        #        for event in pygame.event.get():
-        #            if event.type == pygame.QUIT:
-        #                run = False
-        #
-        #            if event.type == pygame.MOUSEBUTTONDOWN:
-        #                move = montecarlots(game.get_board(), WHITE)
-        #                pos = pygame.mouse.get_pos()
-        #                row, col = get_row_col_from_mouse(pos)
-        #                game.select(row, col)
-        #                game.get_board().get_num()
-
-        # pygame.time.delay(5000)
         game.update()
     print("And the winner is : ", game.winner())
     pygame.quit()
