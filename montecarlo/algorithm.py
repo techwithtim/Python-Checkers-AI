@@ -216,7 +216,7 @@ class MCNode():
         self.backpropagate(reward, node.parent)
 
     def as_string(self, level=0):
-        ret = "t"*level + str(self.reward) + str(self.visits)+"\n"
+        ret = "\t"*level + str(self.reward) + str(self.visits)+"\n"
         for child in self.children:
             ret += child.as_string(level+1)
         return ret
