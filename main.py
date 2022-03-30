@@ -26,8 +26,9 @@ def mcts_ai_move(game, run):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board = montecarlots(game.get_board(), RED)
+    new_board = montecarlots(game.get_board(), game.turn)
     if new_board is None:
+        print("end of game?")
         run = False
     else:
         game.ai_move(new_board)
@@ -76,7 +77,7 @@ def main():
     clock = pygame.time.Clock()
     game = Game(WIN)
 
-    parser = argparse.ArgumentParser(description="The Connect 4 game")
+    parser = argparse.ArgumentParser(description="Checkers game")
     parser.add_argument(
         "--player1",
         "--p1",
@@ -113,6 +114,7 @@ def main():
         if game.winner() is not None:
             run = False
         game.update()
+        # input("[next move]")
     print("And the winner is : ", game.winner())
     pygame.quit()
 

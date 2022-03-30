@@ -1,4 +1,6 @@
 import pygame
+from typing import List
+
 from .constants import BLACK, ROWS, RED, SQUARE_SIZE, COLS, WHITE
 from .piece import Piece
 
@@ -18,7 +20,7 @@ class Board:
     def evaluate(self):
         return self.white_left - self.red_left + (self.white_kings * 0.5 - self.red_kings * 0.5)
 
-    def get_all_pieces(self, color) -> list[Piece]:
+    def get_all_pieces(self, color) -> List[Piece]:
         """
 
         :param color:

@@ -20,11 +20,10 @@ def montecarlots(board, player):
     return chosen_node_board
 
 
-class MCNode():
-    def __init__(self, state: Board, color, parent=None, max_it=10):
+class MCNode:
+    def __init__(self, state: Board, color, parent=None, max_it=5):
         """
         Class that modelizes a node as manipulated in a MCTS
-        :param game:    Current game
         :param state:   Current board
         :param color:   Current player color
         :param parent:  Parent node, if any (none by default, for root)
@@ -48,7 +47,6 @@ class MCNode():
             self.backpropagate(reward, last_node)
             # print(self.as_string())
             # input()  # DEBUG
-
         return self.best_child()
 
     def select(self):
@@ -76,32 +74,30 @@ class MCNode():
         # the function returns a list of possible moves (objects of the class Move)
         possible_moves = self.get_all_moves()
 
-        # Loop variables (to avoid the use of "break")
-        res = True
-        i = 0
-        while res and i < len(possible_moves):
-            move = possible_moves[i]
+        while len(possible_moves) > 0:
+            move = random.choice(possible_moves)
+            possible_moves.remove(move)
             if self.not_in_children_moves(move):
-                # print("Node expanded with move ", move)
-
+                print("Node expanded with move ", move)
                 # When we found a movement that was not tried before, we capture the information to simulate it
                 # (origin piece, final destination, and if a piece was captured)
                 piece = move.get_piece()
                 final_loc = move.get_loc()
                 skip = move.get_skip()
-
                 # Copy of the board, to avoid simulation from influencing the board
                 new_board = deepcopy(self.state)
-
                 # Need to make a deep copy of piece to avoid simulation from influencing the board
                 temp_piece = new_board.get_piece(piece.row, piece.col)
+                if temp_piece == 0:
+                    print("Error, got a non existing piece from possible moves")
+                    print(piece, 'with move', move)
+                    print(temp_piece)
+                    input("[enter]")
 
                 new_state = simulate_move(temp_piece, final_loc, new_board, skip)
-
                 # See definition of the function.
                 self.add_child(new_state, move)
-                res = False
-            i += 1
+                break
         # Returns the newly created child (node)
         return self.children[-1]
 
@@ -132,21 +128,19 @@ class MCNode():
         """
         return len(self.get_all_moves()) == 0
 
-    def fully_explored(self):
+    def fully_explored(self) -> bool:
         """
-        Returns a boolean value telling wether the node has been fully explored or not. A node is fully explored when
+        Returns a boolean value telling whether the node has been fully explored or not. A node is fully explored when
         all his possible moves are in his children
         :return: Boolean
         """
         possible_moves = self.get_all_moves()
-        return len(possible_moves) == len(self.children)
+        return len(possible_moves) == len(self.children_moves)
 
     def get_all_moves(self) -> List[Move]:
         """
-            Function that returns all the possible outcoming boards from the current position when it is the turn of player "color"
-            :param board: Current board
-            :param color: Current player
-            :return: List of Moves corresponding to possible outcomes
+        Function that returns all the possible outcoming boards from the current position when it is the turn of player "color"
+        :return: List of Moves corresponding to possible outcomes
         """
         moves = []
         for piece in self.state.get_all_pieces(self.color):
@@ -158,7 +152,7 @@ class MCNode():
                     moves.append(move)
         return moves
 
-    def add_child(self, state, move):
+    def add_child(self, state: Board, move: Move):
         """
         Function that modifies the current node by adding a new child node, and adding a move to his list of moves.
         :param state:   Current board
@@ -169,29 +163,28 @@ class MCNode():
         self.children.append(child_node)
         self.children_moves.append(move)
 
-    def not_in_children_moves(self, move):
+    def not_in_children_moves(self, move: Move) -> bool:
         for child_move in self.children_moves:
             if child_move.is_equivalent_to(move):
                 return False
         return True
 
-    def simulate(self, last_node):
+    def simulate(self, last_node) -> int:
         """
 
         :param last_node: Initial MCNode for the simulation.
         :return: Reward value (0 or 1)
         """
 
-        new_state = deepcopy(last_node.state)  # To avoid working on existing new_state
-
-        possible_moves = last_node.get_all_moves()
-
-        new_child = last_node
+        new_child = deepcopy(last_node)
+        new_state = new_child.state  # To avoid working on existing new_state
+        possible_moves = new_child.get_all_moves()
 
         while not len(possible_moves) == 0:
-            rand_move = possible_moves[random.randint(0, len(self.children) - 1)]
-            row, col = rand_move.get_loc()
-            new_state.move(rand_move.piece, row, col)
+            rand_move = random.choice(possible_moves)
+            col, row = rand_move.get_loc()
+            skip = rand_move.skip
+            new_state = simulate_move(rand_move.piece, (col, row), new_state, skip)
 
             new_color = RED if last_node.color == WHITE else WHITE
             new_child = MCNode(new_state, new_color)
@@ -216,9 +209,9 @@ class MCNode():
         self.backpropagate(reward, node.parent)
 
     def as_string(self, level=0):
-        ret = "\t"*level + str(self.reward) + str(self.visits)+"\n"
+        ret = "\t" * level + str(self.reward) + "/" + str(self.visits) + "\n"
         for child in self.children:
-            ret += child.as_string(level+1)
+            ret += child.as_string(level + 1)
         return ret
 
 
