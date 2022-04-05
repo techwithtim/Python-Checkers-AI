@@ -38,8 +38,9 @@ def mcts_ai_move(game, run):
 def minimax_ai_move(game):
     """
     Executes a move on the board determined by the Minimax AI.
+    :param game: Game instance
     """
-    value, new_board = minimax(game.get_board(), 3, True, game)
+    value, new_board = minimax(game.get_board(), 3, game)
     game.ai_move(new_board)
 
 
@@ -47,7 +48,8 @@ def human_move(game):
     """
     Executes a move on the board determined by the player.
     """
-    value, new_board = minimax(game.get_board(), 3, True, game)
+    is_max_turn = game.turn == 0
+    value, new_board = minimax(game.get_board(), 3, game)
     game.ai_move(new_board)
     # FIXME: implement the correct function, currently is a copy of minimax_ai_move
 
@@ -115,6 +117,7 @@ def main():
             run = False
         game.update()
         # input("[next move]")
+        # pygame.time.wait(1000)
     print("And the winner is : ", game.winner())
     pygame.quit()
 

@@ -4,7 +4,10 @@ import pygame
 RED = (255,0,0)
 WHITE = (255, 255, 255)
 
-def minimax(position, depth, max_player, game):
+def minimax(position, depth, game):
+    # Need to know if the current player is player MAX or player MIN
+    max_player = game.turn == WHITE
+
     if depth == 0 or position.winner() != None:
         return position.evaluate(), position
     
@@ -12,7 +15,7 @@ def minimax(position, depth, max_player, game):
         maxEval = float('-inf')
         best_move = None
         for move in get_all_moves(position, WHITE, game):
-            evaluation = minimax(move, depth-1, False, game)[0]
+            evaluation = minimax(move, depth-1, game)[0]
             maxEval = max(maxEval, evaluation)
             if maxEval == evaluation:
                 best_move = move
@@ -22,7 +25,7 @@ def minimax(position, depth, max_player, game):
         minEval = float('inf')
         best_move = None
         for move in get_all_moves(position, RED, game):
-            evaluation = minimax(move, depth-1, True, game)[0]
+            evaluation = minimax(move, depth-1, game)[0]
             minEval = min(minEval, evaluation)
             if minEval == evaluation:
                 best_move = move
