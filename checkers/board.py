@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pygame
 from typing import List
 
@@ -80,11 +82,19 @@ class Board:
     
     def winner(self):
         # TODO : corriger la méthode
+        """
+        Proposition de correction : la partie se termine quand l'un des deux n'a plus de pièce OU plus de moves possible
+        :return:
+        """
         self.red_left, self.white_left = self.get_num()
         if self.red_left <= 0:
             return WHITE
         elif self.white_left <= 0:
             return RED
+        elif len(self.get_all_moves(WHITE)) == 0 :
+            return RED
+        elif  len(self.get_all_moves(RED)) == 0 :
+            return WHITE
 
         return None 
     
@@ -174,3 +184,22 @@ class Board:
        num_whites = len(self.get_all_pieces(WHITE))
        num_reds = len(self.get_all_pieces(RED))
        return num_reds, num_whites
+
+    def get_all_moves(self, color):
+        moves = []
+
+        for piece in self.get_all_pieces(color):
+            valid_moves = self.get_valid_moves(piece)[1]
+            for move, skip in valid_moves.items():
+                temp_board = deepcopy(self)
+                temp_piece = temp_board.get_piece(piece.row, piece.col)
+                new_board = temp_board.simulate_move(temp_piece, move, skip)
+                moves.append(new_board)
+        return moves
+
+    def simulate_move(self, piece, move, skip):
+        self.move(piece, move[0], move[1])
+        if skip:
+            self.remove(skip)
+
+        return self
