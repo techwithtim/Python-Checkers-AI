@@ -26,13 +26,13 @@ def mcts_ai_move(game, run):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board = montecarlots(game.get_board(), game.turn)
+    new_board, new_tree = montecarlots(game.get_board(), game.turn)
     if new_board is None:
         print("end of game?")
         run = False
     else:
         game.ai_move(new_board)
-    return run
+    return run, new_tree
 
 
 def minimax_ai_move(game):
@@ -63,6 +63,7 @@ def make_move(game, p, n, run):
     """
     Executes a move on the board determined by the arguments chosen at game launch.
     """
+    tree = None
     if p[n] == "human":
         human_move(game)
     else:
@@ -70,9 +71,9 @@ def make_move(game, p, n, run):
         if p[n] == "minimax":
             minimax_ai_move(game)
         elif p[n] == "mcts":
-            run = mcts_ai_move(game, run)
+            run, tree = mcts_ai_move(game, run)
         print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
-    return run
+    return run, tree
 
 
 def main():
@@ -108,15 +109,16 @@ def main():
     args = parser.parse_args()
 
     p = [args.player1, args.player2]
+    tree = None
 
     while run:
         clock.tick(FPS)
 
         if game.turn == WHITE:
-            run = make_move(game, p, 0, run)
+            run, tree = make_move(game, p, 0, run)
 
         elif game.turn == RED:
-            run = make_move(game, p, 1, run)
+            run, tree = make_move(game, p, 1, run)
 
         if game.winner() is not None:
             run = False

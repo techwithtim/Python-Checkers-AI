@@ -17,7 +17,7 @@ def montecarlots(board, player):
     tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
-    return chosen_node_board
+    return chosen_node_board, tree
 
 
 class MCNode:
