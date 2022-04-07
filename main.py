@@ -22,11 +22,11 @@ def get_row_col_from_mouse(pos):
     return row, col
 
 
-def mcts_ai_move(game, run):
+def mcts_ai_move(game, run, tree):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board, new_tree = montecarlots(game.get_board(), game.turn)
+    new_board, new_tree = montecarlots(game.get_board(), game.turn, tree)
     if new_board is None:
         print("end of game?")
         run = False
@@ -59,11 +59,10 @@ def human_move(game):
     # FIXME: implement the correct function, currently is a copy of minimax_ai_move
 
 
-def make_move(game, p, n, run):
+def make_move(game, p, n, run, tree):
     """
     Executes a move on the board determined by the arguments chosen at game launch.
     """
-    tree = None
     if p[n] == "human":
         human_move(game)
     else:
@@ -71,7 +70,7 @@ def make_move(game, p, n, run):
         if p[n] == "minimax":
             minimax_ai_move(game)
         elif p[n] == "mcts":
-            run, tree = mcts_ai_move(game, run)
+            run, tree = mcts_ai_move(game, run, tree)
         print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
     return run, tree
 
@@ -109,16 +108,16 @@ def main():
     args = parser.parse_args()
 
     p = [args.player1, args.player2]
-    tree = None
+    most_recent_tree = None
 
     while run:
         clock.tick(FPS)
 
         if game.turn == WHITE:
-            run, tree = make_move(game, p, 0, run)
+            run, most_recent_tree = make_move(game, p, 0, run, most_recent_tree)
 
         elif game.turn == RED:
-            run, tree = make_move(game, p, 1, run)
+            run, most_recent_tree = make_move(game, p, 1, run, most_recent_tree)
 
         if game.winner() is not None:
             run = False

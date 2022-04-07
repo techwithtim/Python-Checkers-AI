@@ -13,11 +13,12 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
 
-def montecarlots(board, player):
-    tree = MCNode(board, player)
+def montecarlots(board, player, tree):
+    if not tree:
+        tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
-    return chosen_node_board, tree
+    return chosen_node_board, chosen_node
 
 
 class MCNode:
