@@ -97,7 +97,21 @@ class Board:
             return WHITE
 
         return None 
-    
+
+    def eval_piece_row_value(self, color):
+        """
+        Evaluates the current board for the given color following the "Piece & Row to value" method.
+        Pawn’s value = 5 + row number
+        King’s value = 5 + # of rows + 2
+        :param color: color on which we focus
+        :return: the value of the board for the given color
+        """
+        res = 0
+        num_of_rows = 8
+        for piece in self.get_all_pieces(color) :
+            res = 5 + piece.row if not piece.king else 5 + num_of_rows + 2
+        return res
+
     def get_valid_moves(self, piece):
         moves = {}
         left = piece.col - 1

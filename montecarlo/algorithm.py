@@ -182,6 +182,8 @@ class MCNode:
         possible_moves = new_child.get_all_moves()
 
         while not len(possible_moves) == 0:
+
+            ## TODO : implement heuristic here
             rand_move = random.choice(possible_moves)
             col, row = rand_move.get_loc()
             skip = rand_move.skip
