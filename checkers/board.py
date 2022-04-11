@@ -120,9 +120,26 @@ class Board:
             res += 5 + row_no if not piece.king else 5 + num_of_rows + 2
         return res
 
+    def eval_safe_pieces(self, color):
+        """
+        Evaluates the current board for the given color by accounting for that color's safe pieces
+        :param color: color on which we focus
+        :return: the value of the board for the given color
+        """
+        res = 0
+
+        for piece in self.get_all_pieces(color):
+            row_no = piece.row
+            col_no = piece.col
+
+            if row_no in [0, 7] or col_no in [0, 7]:
+                res += 2
+
+        return res
+
     def eval(self, color):
         # TODO : combine with other heuristics
-        return self.eval_piece_row_value(color)
+        return self.eval_piece_row_value(color) + self.eval_safe_pieces(color)
 
     def get_valid_moves(self, piece):
         moves = {}
