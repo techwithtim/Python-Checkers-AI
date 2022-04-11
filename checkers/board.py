@@ -157,7 +157,9 @@ class Board:
         # Modification : return the valid moves for the current piece, to keep track of this information
         return piece, moves
 
-    def _traverse_left(self, start, stop, step, color, left, skipped=[]):
+    def _traverse_left(self, start, stop, step, color, left, skipped=None):
+        if skipped is None:
+            skipped = []
         moves = {}
         last = []
         for r in range(start, stop, step):

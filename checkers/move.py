@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from checkers.board import Board
 from checkers.piece import Piece
 
 
@@ -40,7 +41,7 @@ class Move:
     def compute_final_state(self):
         col, row = self.get_loc()
         skip = self.skip
-        temp_board = deepcopy(self.origin_state)
+        temp_board: Board = deepcopy(self.origin_state)
         temp_piece = temp_board.get_piece(self.piece.row, self.piece.col)
         self.final_state = temp_board.simulate_move(temp_piece, (col, row), skip)
         return

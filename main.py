@@ -1,7 +1,10 @@
 # Assets: https://techwithtim.net/wp-content/uploads/2020/09/assets.zip
 import pygame
+
+from checkers.board import Board
 from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, RED, WHITE
 from checkers.game import Game
+from checkers.move import Move
 from minimax.algorithm import minimax
 from montecarlo.algorithm import montecarlots, MCNode
 import argparse
@@ -41,7 +44,9 @@ def minimax_ai_move(game, tree):
     :param game: Game instance
     :param tree: MCTS tree
     """
-    value, new_board = minimax(game.get_board(), 3, game)
+    value, chosen_move = minimax(game.get_board(), 3, game)
+    chosen_move.compute_final_state()
+    new_board = chosen_move.final_state
     if tree:
         tree = tree.get_child(new_board)
     # If no moves left
@@ -57,8 +62,10 @@ def human_move(game):
     """
     Executes a move on the board determined by the player.
     """
-    value, new_board = minimax(game.get_board(), 3, game)
-    game.ai_move(new_board)
+    value, chosen_move = minimax(game.get_board(), 3, game) # TODO pourquoi c'est un minimax ?
+    chosen_move.compute_final_state()
+
+    game.ai_move(chosen_move.final_state)
     # FIXME: implement the correct function, currently is a copy of minimax_ai_move
 
 
@@ -73,7 +80,7 @@ def make_move(game, p, n, run, tree):
         if p[n] == "minimax":
             tree = minimax_ai_move(game, tree)
         elif p[n] == "mcts":
-            run, tree = mcts_ai_move(game, run, tree)
+            run, tree, best_move = mcts_ai_move(game, run, tree)
         print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
     return run, tree
 
