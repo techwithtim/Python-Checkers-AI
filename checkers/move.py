@@ -31,7 +31,7 @@ class Move:
 
     def eval_move(self):
         # TODO : improve with heuristic taking into account the movement (taking a piece, reaching the other side)
-        #  Currently : does a comparaison after-before. So it's a "+1" if normal move, "+2" if takes a piece
+        #  Currently : does a comparison after-before. So it's a "+1" if normal move, "+2" if takes a piece
         origin_eval = self.origin_state.eval(self.color)
         self.compute_final_state()
         final_eval = self.final_state.eval(self.color)

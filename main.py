@@ -43,7 +43,7 @@ def minimax_ai_move(game):
     value, new_board = minimax(game.get_board(), 3, game)
     # If no moves left
     if new_board == None :
-        # When no moves left, actually it is possible to loop so we have to put a limit of turns or decide that the game is over
+        # When no moves left, actually it is possible to loop, so we have to put a limit of turns or decide that the game is over
         print("Player {} had no moves left".format(game.turn))
         new_board = game.board
 

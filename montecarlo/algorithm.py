@@ -14,8 +14,9 @@ WHITE = (255, 255, 255)
 
 
 def montecarlots(board, player, tree):
-    if not tree:
-        tree = MCNode(board, player)
+    # if not tree:
+    #     tree = MCNode(board, player)
+    tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
     return chosen_node_board, chosen_node
@@ -24,7 +25,7 @@ def montecarlots(board, player, tree):
 class MCNode:
     def __init__(self, state: Board, color, parent=None, max_it=5):
         """
-        Class that modelizes a node as manipulated in a MCTS
+        Class that modelizes a node as manipulated in an MCTS
         :param state:   Current board
         :param color:   Current player color
         :param parent:  Parent node, if any (none by default, for root)
