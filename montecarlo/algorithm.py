@@ -14,9 +14,8 @@ WHITE = (255, 255, 255)
 
 
 def montecarlots(board, player, tree):
-    # if not tree:
-    #     tree = MCNode(board, player)
-    tree = MCNode(board, player)
+    if not tree:
+        tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
     return chosen_node_board, chosen_node
@@ -164,6 +163,11 @@ class MCNode:
         child_node = MCNode(state, parent=self, color=self.adv_color)
         self.children.append(child_node)
         self.children_moves.append(move)
+
+    def get_child(self, state: Board):
+        for child in self.children:
+            if child.state == state:
+                return child
 
     def not_in_children_moves(self, move: Move) -> bool:
         for child_move in self.children_moves:
