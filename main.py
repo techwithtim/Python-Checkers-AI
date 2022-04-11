@@ -26,13 +26,13 @@ def mcts_ai_move(game, run, tree):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board, new_tree = montecarlots(game.get_board(), game.turn, tree)
+    new_board, new_tree, best_move = montecarlots(game.get_board(), game.turn, tree)
     if new_board is None:
         print("end of game?")
         run = False
     else:
         game.ai_move(new_board)
-    return run, new_tree
+    return run, new_tree, best_move
 
 
 def minimax_ai_move(game, tree):
