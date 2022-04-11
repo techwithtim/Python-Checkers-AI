@@ -1,8 +1,13 @@
 class Move:
-    def __init__(self, origin_piece, destination_loc, skip):
+    def __init__(self, origin_state, color, origin_piece, destination_loc, skip):
+        self.origin_state = origin_state
+        self.color = color
         self.piece = origin_piece
         self.loc = destination_loc
         self.skip = skip
+        self.value = "Not yet computed"
+        # We do not assign a value to the move yet, we will do it only when necessary
+        # self.value = self.eval_move()
 
     def get_piece(self):
         return self.piece
@@ -13,10 +18,20 @@ class Move:
     def get_skip(self):
         return self.skip
 
+    def compute_value(self):
+        self.value = self.eval_move()
+        return
+
+    def eval_move(self):
+        # TODO : improve with heuristic taking into account the movement (taking a piece, reaching the other side)
+        return self.origin_state.eval(self.color)
+
+
     def __repr__(self):
-        return("Move piece {} to {} ({} piece taken)".format(self.piece, self.loc, len(self.skip) ))
+        return("From board {} move piece {} to {} ({} piece taken). Value = {}".format(self.origin_state, self.piece, self.loc, len(self.skip), self.value ))
 
     def is_equivalent_to(self, other_move):
+        # TODO ajouter comparaison entre les states (les board)
         piece_test = self.piece.color == other_move.piece.color
         piece_test *= self.piece.row == other_move.piece.row
         piece_test *= self.piece.col == other_move.piece.col

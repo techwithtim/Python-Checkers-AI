@@ -148,7 +148,7 @@ class MCNode:
             valid_moves = self.state.get_valid_moves(piece)[1]  # index 0 is the piece itself
             if len(valid_moves) != 0:
                 for final_dest, skip in valid_moves.items():
-                    move = Move(piece, final_dest, skip)
+                    move = Move(self.state, self.color, piece, final_dest, skip)
                     # print(move)
                     moves.append(move)
         return moves
@@ -170,6 +170,34 @@ class MCNode:
                 return False
         return True
 
+    def choose_best_moves(self, moves, number=3) -> List[Move]:
+        """
+        Chooses the best moves in a list of moves. Default : chooses 3 best moves.
+        Returns all the moves if less than 3 moves in the list
+        :param moves: list of possible moves
+        :param number: number of best moves to keep
+        :return: List of the *number* best moves in the *moves* list
+        """
+
+        for move in moves :
+            move.compute_value()
+
+        if len(moves) <= number :
+            return moves
+
+
+        # Sorts the moves list in increasing order
+
+        best_moves = sorted(moves, key=lambda m : m.value, reverse=False)[:number]
+        # print("before sorting :")
+        # for move in moves :
+        #     print(move.value)
+        # print("After sorting : ")
+        # for move in best_moves:
+        #     print(move.value)
+
+        return best_moves
+
     def simulate(self, last_node) -> int:
         """
 
@@ -183,8 +211,15 @@ class MCNode:
 
         while not len(possible_moves) == 0:
 
-            ## TODO : implement heuristic here
-            rand_move = random.choice(possible_moves)
+            ## TODO : implement heuristic here, instead of chosing random move, choose one of the best moves from heuristic
+            best_moves = self.choose_best_moves(possible_moves)
+            # print("Here are the best moves : ")
+            # for move in best_moves :
+            #     print("\t", move)
+
+            rand_move = random.choice(best_moves)
+
+
             col, row = rand_move.get_loc()
             skip = rand_move.skip
             new_state = simulate_move(rand_move.piece, (col, row), new_state, skip)

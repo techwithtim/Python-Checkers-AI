@@ -112,6 +112,11 @@ class Board:
             res = 5 + piece.row if not piece.king else 5 + num_of_rows + 2
         return res
 
+
+    def eval(self, color):
+        # TODO : combine with other heuristics
+        return self.eval_piece_row_value(color)
+
     def get_valid_moves(self, piece):
         moves = {}
         left = piece.col - 1
