@@ -13,29 +13,39 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
 
-def montecarlots(board, player, tree):
+def montecarlots(board, player, tree=None):
+    """
+    Proceeds a Monte Carlo tree search on the given board, considering that it's given player's turn.
+    A possible precomputed search tree can be given to allow deeper computations
+    :param board: Board to evaluate the best move on
+    :param player: Player who has to make a move
+    :param tree: Optionnal precomputed tree where root should be the current state of the game
+    :return: Board after best move, node after best move (the futur root), move to go from current board to chosen board
+    """
     if not tree:
+        # New tree
         tree = MCNode(board, player)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
-    return chosen_node_board, chosen_node
+    return chosen_node_board, chosen_node, chosen_node.parent_action
 
 
 class MCNode:
-    def __init__(self, state: Board, color, parent=None, max_it=5):
+    def __init__(self, state: Board, color, parent=None, max_it=5, move: Move=None):
         """
-        Class that modelizes a node as manipulated in a MCTS
+        Class that modelizes a node as manipulated in an MCTS
         :param state:   Current board
         :param color:   Current player color
         :param parent:  Parent node, if any (none by default, for root)
-        :param parent_action:   pas encore compris ce paramètre
+        :param parent_action:   Move to go from parent state to self.state
         """
         self.state: Board = state
         self.color = color
         self.adv_color = WHITE if self.color == RED else RED
         self.reward = 0.0
-        self.visits = 1  # On passera toujours par le node qu'on vient de créer
+        self.visits = 1  # We always visit newly created node
         self.parent = parent
+        self.parent_action = move
         self.children: List[MCNode] = []
         self.children_moves = []
         self.max_it = max_it
@@ -160,9 +170,14 @@ class MCNode:
         :param move:    move to add
         :return:        None
         """
-        child_node = MCNode(state, parent=self, color=self.adv_color)
+        child_node = MCNode(state, parent=self, color=self.adv_color, move=move)
         self.children.append(child_node)
         self.children_moves.append(move)
+
+    def get_child(self, state: Board):
+        for child in self.children:
+            if child.state == state:
+                return child
 
     def not_in_children_moves(self, move: Move) -> bool:
         for child_move in self.children_moves:
@@ -198,9 +213,10 @@ class MCNode:
         """
 
         new_child = deepcopy(last_node)
-        new_state = new_child.state  # To avoid working on existing new_state
+        new_state: Board = new_child.state  # To avoid working on existing new_state
         possible_moves = new_child.get_all_moves()
 
+        # TODO : change loop condition to consider different ending possibilities
         while not len(possible_moves) == 0:
             # Use of the heuristic
             best_moves = self.choose_best_moves(possible_moves)
@@ -211,9 +227,8 @@ class MCNode:
             new_state = new_state.simulate_move(rand_move.piece, (col, row), skip)
 
             new_color = RED if last_node.color == WHITE else WHITE
-            new_child = MCNode(new_state, new_color)
+            new_child = MCNode(new_state, new_color, move=rand_move)
             possible_moves = new_child.get_all_moves()
-            break
 
         winner_color = new_child.state.winner()
         return 1 if winner_color == last_node.color else 0
