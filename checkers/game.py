@@ -1,11 +1,12 @@
 import pygame
-from .constants import RED, WHITE, BLUE, SQUARE_SIZE
+from .constants import RED, WHITE, BLUE, SQUARE_SIZE, ROWS, COLS
 from checkers.board import Board
 
 class Game:
     def __init__(self, win):
         self._init()
         self.win = win
+        self.king_moved = 0
     
     def update(self):
         self.board.draw(self.win)
@@ -19,6 +20,8 @@ class Game:
         self.valid_moves = {}
 
     def winner(self):
+        if self.king_moved >= 26:
+            return "BOTH"
         return self.board.winner()
 
     def reset(self):
@@ -44,9 +47,16 @@ class Game:
         return False
 
     def _move(self, row, col):
-        piece = self.board.get_piece(row, col)
+        piece = self.board.get_piece(row, col) # La place à occuper ensuite.
         if self.selected and piece == 0 and (row, col) in self.valid_moves:
-            self.board.move(self.selected, row, col)
+            self.board.move(self.selected, row, col) # A ce moment là, on bouge une pièce, il faut regarder si c'est un king ou pas.
+            if self.selected.king:
+                # Il faut compter chaque fois qu'une dame bouge.
+                print("Une dame a été jouée")
+                self.king_moved += 1
+            else:
+                print("Ce n'est pas une dame qui a joué")
+                self.king_moved = 0
             skipped = self.valid_moves[(row, col)]
             if skipped:
                 self.board.remove(skipped)
@@ -72,5 +82,21 @@ class Game:
         return self.board
 
     def ai_move(self, board):
+        # Change here the counting of king_moved
+        self.compare_boards(board)
         self.board = board
         self.change_turn()
+
+    def compare_boards(self, new_board):
+        # On doit comparer les deux pour savoir quelle pièce a été jouée
+        print("Yo")
+        for i in range(ROWS):
+            for j in range(COLS):
+                if self.board.get_piece(i, j) == 0 and new_board.get_piece(i, j) != 0:
+                    if new_board.get_piece(i,j).king:
+                        print("Une dame a bougé")
+                        self.king_moved += 1
+                    else:
+                        print("La dame n'a pas bougé")
+                        self.king_moved = 0
+                    return

@@ -88,13 +88,15 @@ class Board:
         """
         self.red_left, self.white_left = self.get_num()
         if self.red_left <= 0:
+            #Il n'y a plus de rouge sur le board.
             return WHITE
         elif self.white_left <= 0:
+            # Il n'y a plus de blanc sur le board.
             return RED
-        elif len(self.get_all_moves(WHITE)) == 0 :
-            return RED
-        elif  len(self.get_all_moves(RED)) == 0 :
-            return WHITE
+        #elif len(self.get_all_moves(WHITE)) == 0 :
+            #return RED
+        #elif  len(self.get_all_moves(RED)) == 0 :
+            #return WHITE
 
         return None 
 
