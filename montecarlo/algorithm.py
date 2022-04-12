@@ -95,7 +95,7 @@ class MCNode:
                     print(temp_piece)
                     input("[enter]")
 
-                new_state = simulate_move(temp_piece, final_loc, new_board, skip)
+                new_state = new_board.simulate_move(temp_piece, final_loc, skip)
                 # See definition of the function.
                 self.add_child(new_state, move)
                 break
@@ -179,22 +179,14 @@ class MCNode:
         :return: List of the *number* best moves in the *moves* list
         """
 
-        for move in moves :
+        for move in moves:
             move.compute_value()
 
-        if len(moves) <= number :
+        if len(moves) <= number:
             return moves
 
-
-        # Sorts the moves list in increasing order
-
-        best_moves = sorted(moves, key=lambda m : m.value, reverse=False)[:number]
-        # print("before sorting :")
-        # for move in moves :
-        #     print(move.value)
-        # print("After sorting : ")
-        # for move in best_moves:
-        #     print(move.value)
+        # Sorts the moves list in increasing order, keeps the *number* first ones
+        best_moves = sorted(moves, key=lambda m: m.value, reverse=False)[:number]
 
         return best_moves
 
@@ -210,23 +202,18 @@ class MCNode:
         possible_moves = new_child.get_all_moves()
 
         while not len(possible_moves) == 0:
-
-            ## TODO : implement heuristic here, instead of chosing random move, choose one of the best moves from heuristic
+            # Use of the heuristic
             best_moves = self.choose_best_moves(possible_moves)
-            # print("Here are the best moves : ")
-            # for move in best_moves :
-            #     print("\t", move)
-
             rand_move = random.choice(best_moves)
-
 
             col, row = rand_move.get_loc()
             skip = rand_move.skip
-            new_state = simulate_move(rand_move.piece, (col, row), new_state, skip)
+            new_state = new_state.simulate_move(rand_move.piece, (col, row), skip)
 
             new_color = RED if last_node.color == WHITE else WHITE
             new_child = MCNode(new_state, new_color)
             possible_moves = new_child.get_all_moves()
+            break
 
         winner_color = new_child.state.winner()
         return 1 if winner_color == last_node.color else 0
@@ -251,11 +238,3 @@ class MCNode:
         for child in self.children:
             ret += child.as_string(level + 1)
         return ret
-
-
-def simulate_move(piece, move, board, skip):
-    board.move(piece, move[0], move[1])
-    if skip:
-        board.remove(skip)
-
-    return board

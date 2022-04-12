@@ -108,8 +108,15 @@ class Board:
         """
         res = 0
         num_of_rows = 8
+        row_no = 0
+
         for piece in self.get_all_pieces(color) :
-            res = 5 + piece.row if not piece.king else 5 + num_of_rows + 2
+            if color == RED:
+                row_no = (8 - piece.row)
+            elif color == WHITE:
+                row_no = piece.row
+
+            res += 5 + row_no if not piece.king else 5 + num_of_rows + 2
         return res
 
 
