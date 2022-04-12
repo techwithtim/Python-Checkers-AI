@@ -58,3 +58,5 @@ class Move:
         dest_test = self.loc == other_move.loc
 
         return piece_test*dest_test
+
+

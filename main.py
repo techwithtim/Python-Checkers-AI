@@ -34,7 +34,7 @@ def mcts_ai_move(game, run, tree):
         print("end of game?")
         run = False
     else:
-        game.ai_move(new_board)
+        game.ai_move(new_board, best_move)
     return run, new_tree, best_move
 
 
@@ -54,7 +54,7 @@ def minimax_ai_move(game, tree):
         # When no moves left, actually it is possible to loop, so we have to put a limit of turns or decide that the game is over
         print("Player {} had no moves left".format(game.turn))
         new_board = game.board
-    game.ai_move(new_board)
+    game.ai_move(new_board, chosen_move)
     return tree
 
 

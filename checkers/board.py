@@ -82,7 +82,6 @@ class Board:
                     self.white_left -= 1
 
     def winner(self):
-        # TODO : corriger la méthode
         """
         Proposition de correction : la partie se termine quand l'un des deux n'a plus de pièce OU plus de moves possible
         :return:
@@ -94,11 +93,6 @@ class Board:
         elif self.white_left <= 0:
             # Il n'y a plus de blanc sur le board.
             return RED
-        #elif len(self.get_all_moves(WHITE)) == 0 :
-            #return RED
-        #elif  len(self.get_all_moves(RED)) == 0 :
-            #return WHITE
-
         return None
 
     def eval_piece_row_value(self, color):

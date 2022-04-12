@@ -89,7 +89,7 @@ class MCNode:
             move = random.choice(possible_moves)
             possible_moves.remove(move)
             if self.not_in_children_moves(move):
-                print("Node expanded with move ", move)
+                #print("Node expanded with move ", move)
                 # When we found a movement that was not tried before, we capture the information to simulate it
                 # (origin piece, final destination, and if a piece was captured)
                 piece = move.get_piece()
@@ -100,9 +100,9 @@ class MCNode:
                 # Need to make a deep copy of piece to avoid simulation from influencing the board
                 temp_piece = new_board.get_piece(piece.row, piece.col)
                 if temp_piece == 0:
-                    print("Error, got a non existing piece from possible moves")
-                    print(piece, 'with move', move)
-                    print(temp_piece)
+                    #print("Error, got a non existing piece from possible moves")
+                    #print(piece, 'with move', move)
+                    #print(temp_piece)
                     input("[enter]")
 
                 new_state = new_board.simulate_move(temp_piece, final_loc, skip)
