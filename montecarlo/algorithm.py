@@ -13,7 +13,7 @@ RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
 
-def montecarlots(board, player, tree=None):
+def montecarlots(board, player, game, tree=None):
     """
     Proceeds a Monte Carlo tree search on the given board, considering that it's given player's turn.
     A possible precomputed search tree can be given to allow deeper computations
@@ -22,16 +22,17 @@ def montecarlots(board, player, tree=None):
     :param tree: Optionnal precomputed tree where root should be the current state of the game
     :return: Board after best move, node after best move (the futur root), move to go from current board to chosen board
     """
+    nb_king_moved = game.king_moved
     if not tree:
         # New tree
-        tree = MCNode(board, player)
+        tree = MCNode(board, player, nb_king_moved)
     chosen_node = tree.monte_carlo_tree_search()
     chosen_node_board = chosen_node.state
     return chosen_node_board, chosen_node, chosen_node.parent_action
 
 
 class MCNode:
-    def __init__(self, state: Board, color, parent=None, max_it=5, move: Move=None):
+    def __init__(self, state: Board, color, nb_king_moved, parent=None, max_it=5, move: Move = None):
         """
         Class that modelizes a node as manipulated in an MCTS
         :param state:   Current board
@@ -49,6 +50,7 @@ class MCNode:
         self.children: List[MCNode] = []
         self.children_moves = []
         self.max_it = max_it
+        self.nb_king_moved = nb_king_moved
         return
 
     def monte_carlo_tree_search(self):
@@ -65,7 +67,6 @@ class MCNode:
         This function defines the selection policy. If the current node is still not fully explored,
         it expands the node and selects the newly created child. If the node is fully explored, we
         move down in the tree, selecting the best child until the node is terminal or not fully explored
-
         :return: The selected node according to the policy.
         """
         current_node = self
@@ -89,7 +90,7 @@ class MCNode:
             move = random.choice(possible_moves)
             possible_moves.remove(move)
             if self.not_in_children_moves(move):
-                #print("Node expanded with move ", move)
+                # print("Node expanded with move ", move)
                 # When we found a movement that was not tried before, we capture the information to simulate it
                 # (origin piece, final destination, and if a piece was captured)
                 piece = move.get_piece()
@@ -100,9 +101,9 @@ class MCNode:
                 # Need to make a deep copy of piece to avoid simulation from influencing the board
                 temp_piece = new_board.get_piece(piece.row, piece.col)
                 if temp_piece == 0:
-                    #print("Error, got a non existing piece from possible moves")
-                    #print(piece, 'with move', move)
-                    #print(temp_piece)
+                    # print("Error, got a non existing piece from possible moves")
+                    # print(piece, 'with move', move)
+                    # print(temp_piece)
                     input("[enter]")
 
                 new_state = new_board.simulate_move(temp_piece, final_loc, skip)
@@ -170,7 +171,8 @@ class MCNode:
         :param move:    move to add
         :return:        None
         """
-        child_node = MCNode(state, parent=self, color=self.adv_color, move=move)
+        self.analyze_move(move)
+        child_node = MCNode(state, parent=self, color=self.adv_color, nb_king_moved=self.nb_king_moved, move=move)
         self.children.append(child_node)
         self.children_moves.append(move)
 
@@ -207,7 +209,6 @@ class MCNode:
 
     def simulate(self, last_node) -> int:
         """
-
         :param last_node: Initial MCNode for the simulation.
         :return: Reward value (0 or 1)
         """
@@ -216,8 +217,7 @@ class MCNode:
         new_state: Board = new_child.state  # To avoid working on existing new_state
         possible_moves = new_child.get_all_moves()
 
-        # TODO : change loop condition to consider different ending possibilities
-        while not len(possible_moves) == 0:
+        while not len(possible_moves) == 0 and self.nb_king_moved < 20:
             # Use of the heuristic
             best_moves = self.choose_best_moves(possible_moves)
             rand_move = random.choice(best_moves)
@@ -226,12 +226,12 @@ class MCNode:
             skip = rand_move.skip
             new_state = new_state.simulate_move(rand_move.piece, (col, row), skip)
 
+            self.analyze_move(rand_move)
             new_color = RED if last_node.color == WHITE else WHITE
-            new_child = MCNode(new_state, new_color, move=rand_move)
+            new_child = MCNode(new_state, new_color, self.nb_king_moved, move=rand_move)
             possible_moves = new_child.get_all_moves()
 
-        winner_color = new_child.state.winner()
-        return 1 if winner_color == last_node.color else 0
+        return self.winner(new_child)
 
     def backpropagate(self, reward, node):
         # +=1 visits pour tout et +reward aux nodes avec la couleur du node de départ, +reward%2 aux autres.
@@ -253,3 +253,35 @@ class MCNode:
         for child in self.children:
             ret += child.as_string(level + 1)
         return ret
+
+    def analyze_move(self, move: Move):
+        """
+        Function that updates the number of kings moved to see if this is the end of a game or not.
+        :param move: Move that just has been made by the algorithm.
+        :return: Nothing
+        """
+        # Need to check if this was a king move and if there was a capture.
+        piece_moved = move.get_piece()
+        if piece_moved.is_king():
+            self.nb_king_moved += 1
+            # If no capture, we do nothing. If capture, count is back to zero.
+            if move.get_skip() is not None and len(move.get_skip()) != 0:
+                self.nb_king_moved = 0
+        else:
+            self.nb_king_moved = 0
+
+    def winner(self, new_child):
+        """
+        Function that returns the correct number of points based on the winner or if there is a tie.
+        :param new_child: Child that we are working on at the moment.
+        :return: The number of points (1 if the winner is new_child, 0 if the winner is the other player
+        and 0.5 if it's a tie.
+        """
+        if self.nb_king_moved >= 20:
+            #It's a tie
+            return 0.5
+        else:
+            if new_child.state.winner() == new_child.color:
+                return 1
+            else:
+                return 0

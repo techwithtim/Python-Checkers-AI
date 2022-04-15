@@ -4,11 +4,13 @@ from checkers.board import Board
 from .move import Move
 
 
+
 class Game:
     def __init__(self, win):
         self._init()
         self.win = win
         self.king_moved = 0
+
 
     def update(self):
         self.board.draw(self.win)

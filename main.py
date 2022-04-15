@@ -1,10 +1,8 @@
 # Assets: https://techwithtim.net/wp-content/uploads/2020/09/assets.zip
 import pygame
 
-from checkers.board import Board
 from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, RED, WHITE
 from checkers.game import Game
-from checkers.move import Move
 from minimax.algorithm import minimax
 from montecarlo.algorithm import montecarlots, MCNode
 import argparse
@@ -29,7 +27,7 @@ def mcts_ai_move(game, run, tree):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board, new_tree, best_move = montecarlots(game.get_board(), game.turn, tree)
+    new_board, new_tree, best_move = montecarlots(game.board,game.turn, game, tree)
     if new_board is None:
         print("end of game?")
         run = False
