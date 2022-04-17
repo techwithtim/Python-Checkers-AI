@@ -1,9 +1,10 @@
 # Assets: https://techwithtim.net/wp-content/uploads/2020/09/assets.zip
 import pygame
+
 from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, RED, WHITE
 from checkers.game import Game
 from minimax.algorithm import minimax
-from montecarlo.algorithm import montecarlots
+from montecarlo.algorithm import montecarlots, MCNode
 import argparse
 
 FPS = 60
@@ -26,36 +27,43 @@ def mcts_ai_move(game, run, tree):
     """
     Executes a move on the board determined by the MCTS AI.
     """
-    new_board, new_tree = montecarlots(game.get_board(), game.turn, tree)
+    new_board, new_tree, best_move = montecarlots(game.board,game.turn, game, tree)
     if new_board is None:
         print("end of game?")
         run = False
     else:
-        game.ai_move(new_board)
-    return run, new_tree
+        game.ai_move(new_board, best_move)
+    return run, new_tree, best_move
 
 
-def minimax_ai_move(game):
+def minimax_ai_move(game, tree):
     """
     Executes a move on the board determined by the Minimax AI.
     :param game: Game instance
+    :param tree: MCTS tree
     """
-    value, new_board = minimax(game.get_board(), 3, game)
+    value, chosen_move = minimax(game.get_board(), 3, game)
+    chosen_move.compute_final_state()
+    new_board = chosen_move.final_state
+    if tree:
+        tree = tree.get_child(new_board)
     # If no moves left
-    if new_board == None :
-        # When no moves left, actually it is possible to loop so we have to put a limit of turns or decide that the game is over
+    if new_board is None:
+        # When no moves left, actually it is possible to loop, so we have to put a limit of turns or decide that the game is over
         print("Player {} had no moves left".format(game.turn))
         new_board = game.board
-
-    game.ai_move(new_board)
+    game.ai_move(new_board, chosen_move)
+    return tree
 
 
 def human_move(game):
     """
     Executes a move on the board determined by the player.
     """
-    value, new_board = minimax(game.get_board(), 3, game)
-    game.ai_move(new_board)
+    value, chosen_move = minimax(game.get_board(), 3, game) # TODO pourquoi c'est un minimax ?
+    chosen_move.compute_final_state()
+
+    game.ai_move(chosen_move.final_state)
     # FIXME: implement the correct function, currently is a copy of minimax_ai_move
 
 
@@ -68,9 +76,9 @@ def make_move(game, p, n, run, tree):
     else:
         print("Player {} ({} AI) is thinking".format(n+1, p[n].upper()))
         if p[n] == "minimax":
-            minimax_ai_move(game)
+            tree = minimax_ai_move(game, tree)
         elif p[n] == "mcts":
-            run, tree = mcts_ai_move(game, run, tree)
+            run, tree, best_move = mcts_ai_move(game, run, tree)
         print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
     return run, tree
 

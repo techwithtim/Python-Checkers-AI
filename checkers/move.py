@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from checkers.board import Board
 from checkers.piece import Piece
 
 
@@ -31,7 +32,7 @@ class Move:
 
     def eval_move(self):
         # TODO : improve with heuristic taking into account the movement (taking a piece, reaching the other side)
-        #  Currently : does a comparaison after-before. So it's a "+1" if normal move, "+2" if takes a piece
+        #  Currently : does a comparison after-before. So it's a "+1" if normal move, "+2" if takes a piece
         origin_eval = self.origin_state.eval(self.color)
         self.compute_final_state()
         final_eval = self.final_state.eval(self.color)
@@ -40,7 +41,7 @@ class Move:
     def compute_final_state(self):
         col, row = self.get_loc()
         skip = self.skip
-        temp_board = deepcopy(self.origin_state)
+        temp_board: Board = deepcopy(self.origin_state)
         temp_piece = temp_board.get_piece(self.piece.row, self.piece.col)
         self.final_state = temp_board.simulate_move(temp_piece, (col, row), skip)
         return
@@ -57,3 +58,5 @@ class Move:
         dest_test = self.loc == other_move.loc
 
         return piece_test*dest_test
+
+
