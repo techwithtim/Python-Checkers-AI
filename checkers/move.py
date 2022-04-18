@@ -38,6 +38,7 @@ class Move:
         final_eval = self.final_state.eval(self.color)
         return final_eval - origin_eval + len(self.skip)
 
+
     def compute_final_state(self):
         col, row = self.get_loc()
         skip = self.skip

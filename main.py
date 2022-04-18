@@ -5,10 +5,11 @@ from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, RED, WHITE
 from checkers.game import Game
 from minimax.algorithm import minimax
 from montecarlo.algorithm import montecarlots, MCNode
+import random
 import argparse
 
 FPS = 60
-
+random.seed(15)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Checkers')
 
@@ -28,8 +29,9 @@ def mcts_ai_move(game, run, tree):
     Executes a move on the board determined by the MCTS AI.
     """
     new_board, new_tree, best_move = montecarlots(game.board,game.turn, game, tree)
-    if new_board is None:
+    if new_board is None or best_move is None:
         print("end of game?")
+
         run = False
     else:
         game.ai_move(new_board, best_move)
@@ -118,21 +120,26 @@ def main():
     p = [args.player1, args.player2]
     most_recent_tree = None
 
+    winner = ''
     while run:
         clock.tick(FPS)
 
         if game.turn == WHITE:
             run, most_recent_tree = make_move(game, p, 0, run, most_recent_tree)
-
+            if not run:
+                winner = "RED"
         elif game.turn == RED:
             run, most_recent_tree = make_move(game, p, 1, run, most_recent_tree)
+            if not run:
+                winner = "WHITE"
 
         if game.winner() is not None:
             run = False
+            winner = game.winner()
         game.update()
         # input("[next move]")
         pygame.time.wait(500)
-    print("And the winner is : ", game.winner())
+    print("And the winner is : ", winner)
     pygame.quit()
 
 

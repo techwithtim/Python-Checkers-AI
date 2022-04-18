@@ -27,6 +27,8 @@ def montecarlots(board, player, game, tree=None):
         # New tree
         tree = MCNode(board, player, nb_king_moved)
     chosen_node = tree.monte_carlo_tree_search()
+    if chosen_node is None:
+        return None, None, None
     chosen_node_board = chosen_node.state
     return chosen_node_board, chosen_node, chosen_node.parent_action
 
@@ -60,6 +62,9 @@ class MCNode:
             self.backpropagate(reward, last_node)
             # print(self.as_string())
             # input()  # DEBUG
+        print(self.children)
+        if self.is_terminal_node():
+            return self
         return self.best_child()
 
     def select(self):
@@ -284,4 +289,5 @@ class MCNode:
             if new_child.state.winner() == new_child.color:
                 return 1
             else:
+                # Aussi quand on ne sait plus jouer
                 return 0
