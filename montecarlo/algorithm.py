@@ -63,7 +63,6 @@ class MCNode:
             self.backpropagate(reward, last_node)
             # print(self.as_string())
             # input()  # DEBUG
-        print(self.children)
         if self.is_terminal_node():
             return self
         return self.best_child()

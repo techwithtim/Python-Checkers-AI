@@ -3,12 +3,14 @@ from typing import List
 
 import pygame
 
+from checkers.board import Board
 from checkers.move import Move
 
-RED = (255,0,0)
+RED = (255, 0, 0)
 WHITE = (255, 255, 255)
 
-def minimax(position, depth, game):
+
+def minimax(position: Board, depth, game) -> (float, Move):
     """
     Computes the best move on a given position using a minimax algorithm up to given depth
     :param position:
@@ -19,7 +21,7 @@ def minimax(position, depth, game):
     # Need to know if the current player is player MAX or player MIN
     max_player = game.turn == WHITE
 
-    if depth == 0 or position.winner() != None:
+    if depth == 0 or position.winner() is not None:
         return position.evaluate(), position
     
     if max_player:

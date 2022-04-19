@@ -11,7 +11,7 @@ class Board:
 
     safe_heuri_param = 1
 
-    def __init__(self):
+    def __init__(self, display: bool):
         self.board = []
         self.red_left = self.white_left = 12
         self.red_kings = self.white_kings = 0

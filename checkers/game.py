@@ -4,22 +4,20 @@ from checkers.board import Board
 from .move import Move
 
 
-
 class Game:
-    def __init__(self, win):
-        self._init()
+    def __init__(self, win=None):
+        self._init(display=win is not None)
         self.win = win
         self.king_moved = 0
-
 
     def update(self):
         self.board.draw(self.win)
         self.draw_valid_moves(self.valid_moves)
         pygame.display.update()
 
-    def _init(self):
+    def _init(self, display: bool):
         self.selected = None
-        self.board = Board()
+        self.board = Board(display=False)
         self.turn = WHITE
         self.valid_moves = {}
 
@@ -57,10 +55,10 @@ class Game:
                             col)  # A ce moment là, on bouge une pièce, il faut regarder si c'est un king ou pas.
             if self.selected.king:
                 # Il faut compter chaque fois qu'une dame bouge.
-                print("Une dame a été jouée")
+                # print("Une dame a été jouée")
                 self.king_moved += 1
             else:
-                print("Ce n'est pas une dame qui a joué")
+                # print("Ce n'est pas une dame qui a joué")
                 self.king_moved = 0
             skipped = self.valid_moves[(row, col)]
             if skipped:
@@ -97,12 +95,12 @@ class Game:
         # Need to check if this was a king move and if there was a capture.
         piece_moved = move.get_piece()
         if piece_moved.is_king():
-            print("Dame jouée")
+            # print("Dame jouée")  # DEBUG
             self.king_moved += 1
             # If no capture, we do nothing. If capture, count is back to zero.
             if move.get_skip() is not None and len(move.get_skip()) != 0:
-                print("Capture!")
+                # print("Capture!")  # DEBUG
                 self.king_moved = 0
         else:
-            print("Pion joué")
+            # print("Pion joué")  # DEBUG
             self.king_moved = 0

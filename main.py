@@ -10,8 +10,6 @@ import argparse
 
 FPS = 60
 random.seed(15)
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption('Checkers')
 
 
 def get_row_col_from_mouse(pos):
@@ -30,7 +28,7 @@ def mcts_ai_move(game, run, tree):
     """
     new_board, new_tree, best_move = montecarlots(game.board,game.turn, game, tree)
     if new_board is None or best_move is None:
-        print("end of game?")
+        # print("end of game?")  # DEBUG
         run = False
     else:
         game.ai_move(new_board, best_move)
@@ -43,6 +41,9 @@ def minimax_ai_move(game, tree):
     :param game: Game instance
     :param tree: MCTS tree
     """
+    if game.get_board().winner() is not None:
+        print("Error : Calling minimax_ai_move while there's already a winner ")
+        exit()
     value, chosen_move = minimax(game.get_board(), 3, game)
     chosen_move.compute_final_state()
     new_board = chosen_move.final_state
@@ -51,7 +52,7 @@ def minimax_ai_move(game, tree):
     # If no moves left
     if new_board is None:
         # When no moves left, actually it is possible to loop, so we have to put a limit of turns or decide that the game is over
-        print("Player {} had no moves left".format(game.turn))
+        # print("Player {} had no moves left".format(game.turn))  # DEBUG
         new_board = game.board
     game.ai_move(new_board, chosen_move)
     return tree
@@ -75,12 +76,17 @@ def make_move(game, p, n, run, tree):
     if p[n] == "human":
         human_move(game)
     else:
-        print("Player {} ({} AI) is thinking".format(n+1, p[n].upper()))
-        if p[n] == "minimax":
-            tree = minimax_ai_move(game, tree)
-        elif p[n] == "mcts":
-            run, tree, best_move = mcts_ai_move(game, run, tree)
-        print("Player {} ({} AI) has made its move".format(n+1, p[n].upper()))
+        run, tree = make_ai_move(game, n, p, run, tree)
+    return run, tree
+
+
+def make_ai_move(game, n, p, run, tree):
+    # print("Player {} ({} AI) is thinking".format(n + 1, p[n].upper()))
+    if p[n] == "minimax":
+        tree = minimax_ai_move(game, tree)
+    elif p[n] == "mcts":
+        run, tree, best_move = mcts_ai_move(game, run, tree)
+    # print("Player {} ({} AI) has made its move".format(n + 1, p[n].upper()))
     return run, tree
 
 
@@ -89,7 +95,9 @@ def main():
     One can run games of checkers between different types of bot
     and algorithms by giving as argument the variables above.
     """
-    run = True
+    WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Checkers')
+
     clock = pygame.time.Clock()
     game = Game(WIN)
 
@@ -117,10 +125,10 @@ def main():
     args = parser.parse_args()
 
     p = [args.player1, args.player2]
-    print(args.player1)
     most_recent_tree = None
 
     winner = ''
+    run = True
     while run:
         clock.tick(FPS)
 
