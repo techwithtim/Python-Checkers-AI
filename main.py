@@ -31,7 +31,6 @@ def mcts_ai_move(game, run, tree):
     new_board, new_tree, best_move = montecarlots(game.board,game.turn, game, tree)
     if new_board is None or best_move is None:
         print("end of game?")
-
         run = False
     else:
         game.ai_move(new_board, best_move)
@@ -118,6 +117,7 @@ def main():
     args = parser.parse_args()
 
     p = [args.player1, args.player2]
+    print(args.player1)
     most_recent_tree = None
 
     winner = ''
@@ -143,4 +143,5 @@ def main():
     pygame.quit()
 
 
-main()
+if __name__ == '__main__':
+    main()

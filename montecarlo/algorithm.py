@@ -34,7 +34,9 @@ def montecarlots(board, player, game, tree=None):
 
 
 class MCNode:
-    def __init__(self, state: Board, color, nb_king_moved, parent=None, max_it=5, move: Move = None):
+    max_it = 15
+    exploit_param = 1
+    def __init__(self, state: Board, color, nb_king_moved, parent=None, move: Move = None):
         """
         Class that modelizes a node as manipulated in an MCTS
         :param state:   Current board
@@ -51,7 +53,6 @@ class MCNode:
         self.parent_action = move
         self.children: List[MCNode] = []
         self.children_moves = []
-        self.max_it = max_it
         self.nb_king_moved = nb_king_moved
         return
 
@@ -66,6 +67,12 @@ class MCNode:
         if self.is_terminal_node():
             return self
         return self.best_child()
+
+    def set_max_it(it):
+        MCNode.max_it = it
+
+    def set_exploit(exploit):
+        MCNode.exploit_param = exploit
 
     def select(self):
         """
@@ -129,7 +136,7 @@ class MCNode:
         for c in self.children:
             exploitation = c.reward / c.visits
             exploration = math.sqrt(math.log2(c.visits) / c.visits)
-            score = exploration + exploitation
+            score = exploration + exploitation * self.exploit_param
             if score == best_score:
                 best_children.append(c)
             elif score > best_score:
