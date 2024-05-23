@@ -1,4 +1,6 @@
-# Assets: https://techwithtim.net/wp-content/uploads/2020/09/assets.zip
+"""Old Asset link throws 404 Error - https://www.techwithtim.net/wp-content/uploads/2020/09/assets.zip
+New Asset Link for crown image - https://ibb.co/ZhWjd1F
+"""
 import pygame
 from checkers.constants import WIDTH, HEIGHT, SQUARE_SIZE, RED, WHITE
 from checkers.game import Game
